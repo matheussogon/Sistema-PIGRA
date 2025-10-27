@@ -1,4 +1,10 @@
+import Login from "./components/Login";
+
 function App() {
-  return <h1 className="bg-slate-500 text-blue-600">oii</h1>;
+  return (
+    <div className="w-screen h-screen bg-[#F58232] flex justify-center">
+      <Login />
+    </div>
+  );
 }
 export default App;
