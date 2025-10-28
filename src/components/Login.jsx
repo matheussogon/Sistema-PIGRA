@@ -1,7 +1,10 @@
+import { useNavigate } from "react-router-dom";
+
 function Login() {
+  const navigate = useNavigate();
   return (
     <div className="flex items-center justify-center min-h-screen">
-      <div className="bg-[#1E1E1E] text-white w-[500px] h-auto rounded-2xl p-8 flex flex-col items-center gap-10">
+      <div className="bg-black text-white w-[500px] h-auto rounded-2xl p-8 flex flex-col items-center gap-10">
         {/* Títulos */}
         <div className="flex flex-col items-center gap-6">
           <h1 className="text-4xl font-bold text-[#F58232]">Sistema PIGRA</h1>
@@ -33,7 +36,10 @@ function Login() {
           </div>
 
           {/* Botão Entrar */}
-          <button className="bg-[#F58232] text-white font-bold p-3 rounded-md mt-2">
+          <button
+            onClick={() => navigate("/account")}
+            className="bg-[#F58232] text-white font-bold p-3 rounded-md mt-2"
+          >
             Entrar
           </button>
         </div>
