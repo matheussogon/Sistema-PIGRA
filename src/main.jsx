@@ -8,6 +8,7 @@ import ViewBiometrics from "./pages/ViewBiometrics.jsx";
 import AddBiometrics from "./pages/AddBiometrics.jsx";
 import RemoveBiometrics from "./pages/RemoveBiometrics.jsx";
 import CreateAccount from "./pages/CreateAccount.jsx";
+import RegisterRoom from "./pages/RegisterRoom.jsx";
 
 const router = createBrowserRouter([
   {
@@ -33,6 +34,10 @@ const router = createBrowserRouter([
   {
     path: "create-account",
     element: <CreateAccount />,
+  },
+  {
+    path: "register-room",
+    element: <RegisterRoom />,
   },
 ]);
 createRoot(document.getElementById("root")).render(
