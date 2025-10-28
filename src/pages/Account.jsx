@@ -10,8 +10,11 @@ function Account() {
         <div className="bg-black h-20 w-20 rounded-2xl flex items-center justify-center">
           <User size={52} className="text-white" />
         </div>
-        <div className="bg-black w-[700px] h-20 px-6 rounded-2xl flex items-center justify-center">
-          <h1 className="text-4xl font-bold text-white">Sistema PIGRA</h1>
+        <div className="bg-black w-[600px] h-20 px-6 rounded-2xl flex items-center justify-center">
+          <h1 className="text-3xl font-bold text-white">Sua Conta</h1>
+        </div>
+        <div className="bg-black w-[400px] h-20 px-6 rounded-2xl flex items-center justify-center">
+          <h1 className="text-3xl font-bold text-white">Sistema PIGRA</h1>
         </div>
       </div>
 
