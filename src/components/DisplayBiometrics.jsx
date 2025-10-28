@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 function DisplayBiometrics() {
-  const [biometrics, setbiometrics] = useState([
+  const [biometrics, setBiometrics] = useState([
     {
       id: 1,
       nome: "João Silva",

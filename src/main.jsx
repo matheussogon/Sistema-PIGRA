@@ -6,6 +6,8 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Account from "./pages/Account.jsx";
 import ViewBiometrics from "./pages/ViewBiometrics.jsx";
 import AddBiometrics from "./pages/AddBiometrics.jsx";
+import RemoveBiometrics from "./pages/RemoveBiometrics.jsx";
+import CreateAccount from "./pages/CreateAccount.jsx";
 
 const router = createBrowserRouter([
   {
@@ -23,6 +25,14 @@ const router = createBrowserRouter([
   {
     path: "add-biometrics",
     element: <AddBiometrics />,
+  },
+  {
+    path: "remove-biometrics",
+    element: <RemoveBiometrics />,
+  },
+  {
+    path: "create-account",
+    element: <CreateAccount />,
   },
 ]);
 createRoot(document.getElementById("root")).render(
