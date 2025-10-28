@@ -1,11 +1,20 @@
-import { useLocation } from "react-router-dom";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { User } from "lucide-react";
 import HistoryAccess from "../components/HistoryAccess";
 import AccountButtons from "../components/AccountButtons";
 
 function Account() {
-  const location = useLocation();
-  const usuarioLogado = location.state?.usuario;
+  const navigate = useNavigate();
+  const usuarioLogado = JSON.parse(localStorage.getItem("usuarioLogado"));
+
+  useEffect(() => {
+    if (!usuarioLogado) {
+      navigate("/", { replace: true });
+    }
+  }, [usuarioLogado, navigate]);
+
+  if (!usuarioLogado) return null;
 
   return (
     <div className="w-screen min-h-screen bg-[#F58232] flex flex-col items-center pt-10 gap-8">
@@ -15,7 +24,7 @@ function Account() {
         </div>
         <div className="bg-black w-[600px] h-20 px-6 rounded-2xl flex items-center justify-center">
           <h1 className="text-3xl font-bold text-white">
-            {`Sua Conta${usuarioLogado ? " - " + usuarioLogado.nome : ""}`}
+            {`Sua Conta - ${usuarioLogado.nome}`}
           </h1>
         </div>
         <div className="bg-black w-[400px] h-20 px-6 rounded-2xl flex items-center justify-center">
@@ -27,6 +36,16 @@ function Account() {
         <HistoryAccess />
         <AccountButtons />
       </div>
+
+      <button
+        onClick={() => {
+          localStorage.removeItem("usuarioLogado");
+          navigate("/");
+        }}
+        className="bg-black text-white font-bold p-3 rounded-md"
+      >
+        Sair
+      </button>
     </div>
   );
 }
