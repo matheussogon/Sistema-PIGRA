@@ -8,9 +8,20 @@ function Account() {
   const navigate = useNavigate();
   const usuarioLogado = JSON.parse(localStorage.getItem("usuarioLogado"));
 
+  // Redireciona se não houver usuário logado
   useEffect(() => {
     if (!usuarioLogado) {
       navigate("/", { replace: true });
+    }
+
+    // Imprime informações do usuário no console (id, nome e email)
+    if (usuarioLogado) {
+      console.log({
+        id: usuarioLogado.id,
+        nome: usuarioLogado.nome,
+        email: usuarioLogado.email,
+        senha: usuarioLogado.senha,
+      });
     }
   }, [usuarioLogado, navigate]);
 
@@ -39,7 +50,6 @@ function Account() {
 
       <button
         onClick={() => {
-          localStorage.removeItem("usuarioLogado");
           navigate("/");
         }}
         className="bg-black text-white font-bold p-3 rounded-md"

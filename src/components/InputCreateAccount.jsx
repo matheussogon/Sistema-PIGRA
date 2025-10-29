@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { v4 as uuidv4 } from "uuid"; // Importa o uuid
 
 function InputCreateAccount() {
   const navigate = useNavigate();
@@ -28,10 +29,17 @@ function InputCreateAccount() {
       return;
     }
 
-    const novoUsuario = { nome, email, senha };
+    const novoUsuario = {
+      id: uuidv4(), // Gera ID único
+      nome,
+      email,
+      senha,
+    };
+
     const novosUsuarios = [...usuariosCadastrados, novoUsuario];
     setUsuariosCadastrados(novosUsuarios);
     localStorage.setItem("usuarios", JSON.stringify(novosUsuarios));
+
     setContaCriada(true);
     setErro("");
   };
@@ -46,27 +54,38 @@ function InputCreateAccount() {
 
         {!contaCriada && (
           <>
-            <input
-              type="text"
-              placeholder="Nome"
-              className="p-3 rounded-md text-black w-full"
-              value={nome}
-              onChange={(e) => setNome(e.target.value)}
-            />
-            <input
-              type="text"
-              placeholder="Email"
-              className="p-3 rounded-md text-black w-full"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <input
-              type="password"
-              placeholder="Senha"
-              className="p-3 rounded-md text-black w-full"
-              value={senha}
-              onChange={(e) => setSenha(e.target.value)}
-            />
+            <div className="flex flex-col w-full">
+              <label className="mb-1 text-sm text-gray-300">
+                Nome Completo
+              </label>
+              <input
+                type="text"
+                placeholder="Digite seu nome completo"
+                className="p-3 rounded-md text-black w-full"
+                value={nome}
+                onChange={(e) => setNome(e.target.value)}
+              />
+            </div>
+            <div className="flex flex-col w-full">
+              <label className="mb-1 text-sm text-gray-300">E-mail</label>
+              <input
+                type="text"
+                placeholder="Digite seu e-mail"
+                className="p-3 rounded-md text-black w-full"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+            <div className="flex flex-col w-full">
+              <label className="mb-1 text-sm text-gray-300">Senha</label>
+              <input
+                type="password"
+                placeholder="Digite sua senha"
+                className="p-3 rounded-md text-black w-full"
+                value={senha}
+                onChange={(e) => setSenha(e.target.value)}
+              />
+            </div>
             {erro && <span className="text-red-500">{erro}</span>}
 
             {/* Botão Cadastrar */}

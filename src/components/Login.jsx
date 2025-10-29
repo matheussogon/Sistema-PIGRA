@@ -35,22 +35,26 @@ function Login() {
         <h2 className="text-1xl font-semibold text-white">
           Faça login em sua conta
         </h2>
-
-        <input
-          type="text"
-          placeholder="E-mail"
-          className="p-3 rounded-md text-black w-full"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-
-        <input
-          type="password"
-          placeholder="Senha"
-          className="p-3 rounded-md text-black w-full"
-          value={senha}
-          onChange={(e) => setSenha(e.target.value)}
-        />
+        <div className="flex flex-col w-full">
+          <label className="mb-1 text-sm text-gray-300">Login</label>
+          <input
+            type="text"
+            placeholder="Digite seu e-mail"
+            className="p-3 rounded-md text-black w-full"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </div>
+        <div className="flex flex-col w-full">
+          <label className="mb-1 text-sm text-gray-300">Senha</label>
+          <input
+            type="password"
+            placeholder="Digite sua senha"
+            className="p-3 rounded-md text-black w-full"
+            value={senha}
+            onChange={(e) => setSenha(e.target.value)}
+          />
+        </div>
 
         {erro && <span className="text-red-500">{erro}</span>}
 

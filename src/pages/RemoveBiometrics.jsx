@@ -15,7 +15,7 @@ function AddBiometrics() {
           <ArrowBigLeft size={52} className="text-white fill-current" />
         </button>
         <div className="bg-black w-[600px] h-20 px-6 rounded-2xl flex items-center justify-center">
-          <h1 className="text-3xl font-bold text-white">Adicionar Biometria</h1>
+          <h1 className="text-3xl font-bold text-white">Remover Biometria</h1>
         </div>
         <div className="bg-black w-[400px] h-20 px-6 rounded-2xl flex items-center justify-center">
           <h1 className="text-3xl font-bold text-white">Sistema PIGRA</h1>
