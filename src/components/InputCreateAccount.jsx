@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { v4 as uuidv4 } from "uuid"; // Importa o uuid
+import { api } from "../api";
 
 function InputCreateAccount() {
   const navigate = useNavigate();
@@ -9,39 +9,28 @@ function InputCreateAccount() {
   const [senha, setSenha] = useState("");
   const [erro, setErro] = useState("");
   const [contaCriada, setContaCriada] = useState(false);
-  const [usuariosCadastrados, setUsuariosCadastrados] = useState([]);
 
-  // Carrega usuários do localStorage
-  useEffect(() => {
-    const usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
-    setUsuariosCadastrados(usuarios);
-  }, []);
-
-  const handleCadastro = () => {
+  const handleCadastro = async () => {
     if (!nome || !email || !senha) {
       setErro("Preencha todos os campos!");
       return;
     }
 
-    const jaExiste = usuariosCadastrados.some((u) => u.email === email);
-    if (jaExiste) {
-      setErro("Já existe uma conta com este e-mail!");
-      return;
+    try {
+      // Envia dados para o backend
+      const response = await api.post("/user/", {
+        name: nome,
+        email: email,
+        password_hash: senha, // aqui a senha pode ser criptografada no backend
+      });
+
+      console.log("Usuário criado:", response.data);
+      setContaCriada(true);
+      setErro("");
+    } catch (err) {
+      console.error(err);
+      setErro("Erro ao criar conta. Talvez o email já exista.");
     }
-
-    const novoUsuario = {
-      id: uuidv4(), // Gera ID único
-      nome,
-      email,
-      senha,
-    };
-
-    const novosUsuarios = [...usuariosCadastrados, novoUsuario];
-    setUsuariosCadastrados(novosUsuarios);
-    localStorage.setItem("usuarios", JSON.stringify(novosUsuarios));
-
-    setContaCriada(true);
-    setErro("");
   };
 
   return (
@@ -66,6 +55,7 @@ function InputCreateAccount() {
                 onChange={(e) => setNome(e.target.value)}
               />
             </div>
+
             <div className="flex flex-col w-full">
               <label className="mb-1 text-sm text-gray-300">E-mail</label>
               <input
@@ -76,6 +66,7 @@ function InputCreateAccount() {
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
+
             <div className="flex flex-col w-full">
               <label className="mb-1 text-sm text-gray-300">Senha</label>
               <input
@@ -86,9 +77,9 @@ function InputCreateAccount() {
                 onChange={(e) => setSenha(e.target.value)}
               />
             </div>
+
             {erro && <span className="text-red-500">{erro}</span>}
 
-            {/* Botão Cadastrar */}
             <button
               onClick={handleCadastro}
               className="bg-[#F58232] p-3 mt-2 w-full rounded-md"
@@ -96,7 +87,6 @@ function InputCreateAccount() {
               Cadastrar
             </button>
 
-            {/* Botão Voltar ao Menu Principal */}
             <button
               onClick={() => navigate("/")}
               className="bg-gray-700 p-3 mt-2 w-full rounded-md hover:bg-gray-600 transition"

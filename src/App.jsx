@@ -1,10 +1,30 @@
+import { useEffect, useState } from "react";
 import Login from "./components/Login";
+import { api } from "./api"; // importando a API configurada
 
 function App() {
-  // Agora App só exibe a página de login
+  const [users, setUsers] = useState([]);
+
+  useEffect(() => {
+    // Requisição GET para o endpoint /user/ do backend
+    api
+      .get("/user/")
+      .then((res) => {
+        console.log(res.data); // aqui você vê os dados do banco
+        setUsers(res.data);
+      })
+      .catch((err) => console.error("Erro ao buscar usuários:", err));
+  }, []);
+
   return (
-    <div className="w-screen h-screen bg-[#F58232] flex justify-center items-center">
+    <div className="w-screen h-screen bg-[#F58232] flex flex-col justify-center items-center">
       <Login />
+      <div className="mt-6 text-black">
+        {/* Exibe os nomes dos usuários do banco */}
+        {users.map((user) => (
+          <p key={user.id}>{user.name}</p>
+        ))}
+      </div>
     </div>
   );
 }

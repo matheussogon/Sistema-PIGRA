@@ -1,31 +1,41 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { User } from "lucide-react";
 import HistoryAccess from "../components/HistoryAccess";
 import AccountButtons from "../components/AccountButtons";
+import { api } from "../api";
 
 function Account() {
   const navigate = useNavigate();
-  const usuarioLogado = JSON.parse(localStorage.getItem("usuarioLogado"));
+  const [usuario, setUsuario] = useState(null);
 
-  // Redireciona se não houver usuário logado
+  const usuarioId = localStorage.getItem("usuarioLogadoId"); // apenas o ID do usuário
+
   useEffect(() => {
-    if (!usuarioLogado) {
+    if (!usuarioId) {
       navigate("/", { replace: true });
+      return;
     }
 
-    // Imprime informações do usuário no console (id, nome e email)
-    if (usuarioLogado) {
-      console.log({
-        id: usuarioLogado.id,
-        nome: usuarioLogado.nome,
-        email: usuarioLogado.email,
-        senha: usuarioLogado.senha,
-      });
-    }
-  }, [usuarioLogado, navigate]);
+    const fetchUsuario = async () => {
+      try {
+        const response = await api.get("/user/", { params: { id: usuarioId } });
 
-  if (!usuarioLogado) return null;
+        if (response.data.length === 0) {
+          navigate("/", { replace: true });
+        } else {
+          setUsuario(response.data[0]);
+        }
+      } catch (err) {
+        console.error("Erro ao buscar usuário:", err);
+        navigate("/", { replace: true });
+      }
+    };
+
+    fetchUsuario();
+  }, [usuarioId, navigate]);
+
+  if (!usuario) return null;
 
   return (
     <div className="w-screen min-h-screen bg-[#F58232] flex flex-col items-center pt-10 gap-8">
@@ -35,7 +45,7 @@ function Account() {
         </div>
         <div className="bg-black w-[600px] h-20 px-6 rounded-2xl flex items-center justify-center">
           <h1 className="text-3xl font-bold text-white">
-            {`Sua Conta - ${usuarioLogado.nome}`}
+            {`Sua Conta - ${usuario.name}`}
           </h1>
         </div>
         <div className="bg-black w-[400px] h-20 px-6 rounded-2xl flex items-center justify-center">
@@ -50,6 +60,8 @@ function Account() {
 
       <button
         onClick={() => {
+          localStorage.removeItem("usuarioLogadoId");
+          setUsuario(null);
           navigate("/");
         }}
         className="bg-black text-white font-bold p-3 rounded-md"
