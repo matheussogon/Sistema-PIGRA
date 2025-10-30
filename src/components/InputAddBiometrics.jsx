@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { v4 as uuidv4 } from "uuid";
 import { useNavigate } from "react-router-dom";
 import { Upload } from "lucide-react";
+import { api } from "../api"; // Axios configurado para backend
 
 function InputAddBiometrics() {
   const navigate = useNavigate();
@@ -12,61 +12,64 @@ function InputAddBiometrics() {
   const [erro, setErro] = useState("");
   const [sucesso, setSucesso] = useState(false);
   const [salas, setSalas] = useState([]);
-  const [biometrias, setBiometrias] = useState([]);
 
+  const usuarioId = localStorage.getItem("usuarioLogadoId"); // só para pegar quem está logado
+
+  // Carrega as salas do backend
   useEffect(() => {
-    const salasExistentes = JSON.parse(localStorage.getItem("salas")) || [];
-    setSalas(salasExistentes);
+    if (!usuarioId) {
+      navigate("/", { replace: true });
+      return;
+    }
 
-    const biometriasExistentes =
-      JSON.parse(localStorage.getItem("biometrias")) || [];
-    setBiometrias(biometriasExistentes);
-  }, []);
+    const fetchSalas = async () => {
+      try {
+        const response = await api.get("/room/", {
+          params: { user_id: usuarioId },
+        });
+        setSalas(response.data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchSalas();
+  }, [usuarioId, navigate]);
 
-  const handleAdicionar = () => {
+  const handleAdicionar = async () => {
     if (!nomePessoa || !emailPessoa || !salaSelecionada || !foto) {
       setErro("Preencha todos os campos!");
       return;
     }
 
-    const salaObj = salas.find((s) => s.id === salaSelecionada);
+    const salaObj = salas.find((s) => s.id === parseInt(salaSelecionada));
     if (!salaObj) {
       setErro("Selecione uma sala válida!");
       return;
     }
 
-    const jaExiste = biometrias.some(
-      (b) =>
-        b.emailPessoa === emailPessoa &&
-        b.sala === salaObj.nome &&
-        b.localizacao === salaObj.localizacao
-    );
+    try {
+      // Preparar FormData para envio da foto
+      const formData = new FormData();
+      formData.append("name", nomePessoa);
+      formData.append("email", emailPessoa);
+      formData.append("facial_vector", JSON.stringify([])); // vetor facial vazio
+      formData.append("room_id", salaObj.id);
+      formData.append("photo", foto); // arquivo enviado ao backend
 
-    if (jaExiste) {
-      setErro("Essa pessoa já está cadastrada nessa sala!");
-      return;
+      await api.post("/person/", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      setErro("");
+      setSucesso(true);
+      setNomePessoa("");
+      setEmailPessoa("");
+      setFoto(null);
+      setSalaSelecionada("");
+    } catch (err) {
+      console.error(err);
+      setErro("Essa pessoa já está cadastrada nessa sala.");
     }
-
-    const novaBiometria = {
-      id: uuidv4(),
-      nomePessoa,
-      emailPessoa,
-      sala: salaObj.nome,
-      localizacao: salaObj.localizacao,
-      foto: foto.name,
-      vetorFacial: [],
-    };
-
-    const novasBiometrias = [...biometrias, novaBiometria];
-    setBiometrias(novasBiometrias);
-    localStorage.setItem("biometrias", JSON.stringify(novasBiometrias));
-
-    setErro("");
-    setSucesso(true);
-    setNomePessoa("");
-    setEmailPessoa("");
-    setFoto(null);
-    setSalaSelecionada(""); // reseta o select
   };
 
   return (
@@ -78,21 +81,17 @@ function InputAddBiometrics() {
 
       {!sucesso ? (
         <>
-          {/* Input Foto */}
+          {/* Upload da Foto */}
           <div className="flex flex-col w-full">
             <label className="mb-1 text-sm text-gray-300">Foto da Pessoa</label>
-
             <label className="bg-[#F58232] text-white p-3 rounded-md text-center cursor-pointer flex items-center justify-center gap-2">
-              <Upload size={20} /> {/* Ícone de upload */}
+              <Upload size={20} />
               Enviar foto
               <input
                 type="file"
                 accept="image/*"
                 className="hidden"
-                onChange={(e) => {
-                  if (e.target.files && e.target.files[0])
-                    setFoto(e.target.files[0]);
-                }}
+                onChange={(e) => e.target.files && setFoto(e.target.files[0])}
               />
             </label>
             {foto && (
@@ -102,7 +101,7 @@ function InputAddBiometrics() {
             )}
           </div>
 
-          {/* Input Nome */}
+          {/* Nome da Pessoa */}
           <div className="flex flex-col w-full">
             <label className="mb-1 text-sm text-gray-300">Nome da Pessoa</label>
             <input
@@ -114,7 +113,7 @@ function InputAddBiometrics() {
             />
           </div>
 
-          {/* Input E-mail */}
+          {/* E-mail da Pessoa */}
           <div className="flex flex-col w-full">
             <label className="mb-1 text-sm text-gray-300">E-mail</label>
             <input
@@ -137,7 +136,7 @@ function InputAddBiometrics() {
               <option value="">Selecione a sala</option>
               {salas.map((sala) => (
                 <option key={sala.id} value={sala.id}>
-                  {sala.nome} - {sala.localizacao}
+                  {sala.name} - {sala.location}
                 </option>
               ))}
             </select>

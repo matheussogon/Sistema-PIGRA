@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { v4 as uuidv4 } from "uuid";
+import { api } from "../api"; // axios configurado
+import { useNavigate } from "react-router-dom";
 
 function InputRegisterRoom() {
   const [nomeSala, setNomeSala] = useState("");
@@ -7,63 +8,96 @@ function InputRegisterRoom() {
   const [erro, setErro] = useState("");
   const [salaCadastrada, setSalaCadastrada] = useState(false);
   const [salasCadastradas, setSalasCadastradas] = useState([]);
+  const [userId, setUserId] = useState(null);
+  const navigate = useNavigate();
 
-  // Carrega salas do localStorage ao montar o componente
+  // Obtém o usuário logado pelo ID no localStorage
   useEffect(() => {
-    const salas = JSON.parse(localStorage.getItem("salas")) || [];
-    setSalasCadastradas(salas);
-    console.log("Salas carregadas:", salas); // <-- log inicial
-  }, []);
+    const usuarioId = localStorage.getItem("usuarioLogadoId"); // apenas o ID
+    if (!usuarioId) {
+      navigate("/", { replace: true });
+    } else {
+      setUserId(parseInt(usuarioId)); // converte para número
+    }
+  }, [navigate]);
 
-  const handleCadastro = () => {
+  // Carrega salas do backend para o usuário logado
+  useEffect(() => {
+    if (!userId) return;
+
+    const fetchSalas = async () => {
+      try {
+        const response = await api.get("/room/", {
+          params: { user_id: userId },
+        });
+        setSalasCadastradas(response.data);
+      } catch (err) {
+        console.error("Erro ao carregar salas:", err);
+      }
+    };
+
+    fetchSalas();
+  }, [userId]);
+
+  const handleCadastro = async () => {
     if (!nomeSala || !localizacao) {
       setErro("Preencha todos os campos!");
       return;
     }
 
-    // Verifica se já existe uma sala com mesmo nome e localização
-    const salaExiste = salasCadastradas.some(
-      (sala) =>
-        sala.nome.toLowerCase() === nomeSala.toLowerCase() &&
-        sala.localizacao.toLowerCase() === localizacao.toLowerCase()
-    );
+    try {
+      // Verifica se a sala já existe localmente para este usuário
+      const salaExiste = salasCadastradas.some(
+        (sala) =>
+          sala.name.toLowerCase() === nomeSala.toLowerCase() &&
+          sala.location.toLowerCase() === localizacao.toLowerCase()
+      );
 
-    if (salaExiste) {
-      setErro("Já existe uma sala cadastrada com este nome e localização!");
-      return;
+      if (salaExiste) {
+        setErro("Já existe uma sala cadastrada com este nome e localização!");
+        return;
+      }
+
+      console.log("POST payload:", {
+        name: nomeSala,
+        location: localizacao,
+        user_id: userId,
+      });
+
+      // POST para o backend
+      const response = await api.post("/room/", {
+        name: nomeSala,
+        location: localizacao,
+        user_id: userId,
+      });
+
+      // Atualiza lista local e limpa campos
+      setSalasCadastradas([...salasCadastradas, response.data]);
+      setSalaCadastrada(true);
+      setErro("");
+      setNomeSala("");
+      setLocalizacao("");
+    } catch (err) {
+      console.error("Erro ao cadastrar sala:", err);
+      if (err.response?.status === 400) {
+        setErro(err.response.data.detail);
+      } else {
+        setErro("Erro ao cadastrar sala.");
+      }
     }
-
-    // Cria nova sala com ID único
-    const novaSala = {
-      id: uuidv4(),
-      nome: nomeSala,
-      localizacao: localizacao,
-    };
-
-    const novasSalas = [...salasCadastradas, novaSala];
-    setSalasCadastradas(novasSalas);
-    localStorage.setItem("salas", JSON.stringify(novasSalas));
-    console.log("Salas atualizadas:", novasSalas); // <-- log após cadastro
-
-    setSalaCadastrada(true);
-    setErro("");
-    setNomeSala("");
-    setLocalizacao("");
   };
 
   return (
     <div className="bg-black text-white w-[500px] rounded-2xl p-8 flex flex-col items-center gap-10">
-      {/* Títulos */}
       <div className="flex flex-col items-center gap-6">
         <h1 className="text-4xl font-bold text-[#F58232]">Sistema PIGRA</h1>
         <h2 className="text-base font-semibold text-white text-center">
           {salaCadastrada
             ? "Sala cadastrada com sucesso!"
-            : "Digite o nome e a localização da sala na qual deseja cadastrar"}
+            : "Digite o nome e a localização da sala que deseja cadastrar"}
         </h2>
       </div>
 
-      {/* Formulário */}
       {!salaCadastrada && (
         <div className="flex flex-col w-full gap-4">
           <div className="flex flex-col w-full">
@@ -80,7 +114,7 @@ function InputRegisterRoom() {
             <label className="mb-1 text-sm text-gray-300">Localização</label>
             <input
               type="text"
-              placeholder="Digite o local na qual a sala se encontra"
+              placeholder="Digite o local da sala"
               className="p-3 rounded-md text-black"
               value={localizacao}
               onChange={(e) => setLocalizacao(e.target.value)}
@@ -90,7 +124,6 @@ function InputRegisterRoom() {
         </div>
       )}
 
-      {/* Botões */}
       <div className="flex flex-col w-full gap-2">
         {!salaCadastrada && (
           <button
@@ -100,7 +133,6 @@ function InputRegisterRoom() {
             Cadastrar
           </button>
         )}
-
         {salaCadastrada && (
           <button
             onClick={() => setSalaCadastrada(false)}

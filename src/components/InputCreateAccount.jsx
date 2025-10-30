@@ -17,14 +17,12 @@ function InputCreateAccount() {
     }
 
     try {
-      // Envia dados para o backend
-      const response = await api.post("/user/", {
+      await api.post("/user/", {
         name: nome,
         email: email,
-        password_hash: senha, // aqui a senha pode ser criptografada no backend
+        password_hash: senha,
       });
 
-      console.log("Usuário criado:", response.data);
       setContaCriada(true);
       setErro("");
     } catch (err) {

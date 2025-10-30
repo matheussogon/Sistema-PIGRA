@@ -15,7 +15,6 @@ function Login() {
     }
 
     try {
-      // Busca usuário pelo email no backend
       const response = await api.get("/user/", { params: { email } });
 
       if (response.data.length === 0) {
@@ -25,13 +24,12 @@ function Login() {
 
       const usuario = response.data[0];
 
-      // Verifica senha
       if (usuario.password_hash !== senha) {
         setErro("Email ou senha incorretos");
         return;
       }
 
-      // Login bem-sucedido: salva apenas o ID do usuário
+      // Salva apenas o ID do usuário
       localStorage.setItem("usuarioLogadoId", usuario.id);
       setErro("");
       navigate("/account");
@@ -91,4 +89,4 @@ function Login() {
   );
 }
 
-export default Login;
+export default Login; //22222

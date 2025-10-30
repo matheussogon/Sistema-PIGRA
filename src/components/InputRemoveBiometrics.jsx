@@ -1,56 +1,62 @@
 import { useState, useEffect } from "react";
+import { api } from "../api"; // Axios configurado para backend
 
 function InputRemoveBiometrics() {
   const [emailPessoa, setEmailPessoa] = useState("");
   const [salaSelecionada, setSalaSelecionada] = useState("");
-  const [biometrias, setBiometrias] = useState([]);
   const [salas, setSalas] = useState([]);
   const [mensagem, setMensagem] = useState("");
 
+  const usuarioId = localStorage.getItem("usuarioLogadoId");
+
   useEffect(() => {
-    // Carrega biometrias
-    const biometriasExistentes =
-      JSON.parse(localStorage.getItem("biometrias")) || [];
-    setBiometrias(biometriasExistentes);
+    if (!usuarioId) return;
 
-    // Carrega salas
-    const salasExistentes = JSON.parse(localStorage.getItem("salas")) || [];
-    setSalas(salasExistentes);
-  }, []);
+    const fetchSalas = async () => {
+      try {
+        const response = await api.get("/room/", {
+          params: { user_id: usuarioId },
+        });
+        setSalas(response.data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
 
-  const handleRemover = () => {
+    fetchSalas();
+  }, [usuarioId]);
+
+  const handleRemover = async () => {
     if (!emailPessoa || !salaSelecionada) {
       setMensagem("Preencha todos os campos!");
       return;
     }
 
-    // Verifica se a biometria existe
-    const existe = biometrias.some(
-      (b) => b.emailPessoa === emailPessoa && b.sala === salaSelecionada
-    );
-
-    if (!existe) {
-      setMensagem(
-        "Não existe biometria cadastrada com este e-mail para a sala informada!"
-      );
+    const salaObj = salas.find((s) => s.id === parseInt(salaSelecionada));
+    if (!salaObj) {
+      setMensagem("Selecione uma sala válida!");
       return;
     }
 
-    // Remove a biometria
-    const novasBiometrias = biometrias.filter(
-      (b) => !(b.emailPessoa === emailPessoa && b.sala === salaSelecionada)
-    );
+    try {
+      await api.delete("/person/", {
+        data: {
+          email: emailPessoa,
+          room_id: salaObj.id,
+        },
+      });
 
-    setBiometrias(novasBiometrias);
-    localStorage.setItem("biometrias", JSON.stringify(novasBiometrias));
-    setMensagem("Biometria removida com sucesso!");
-    setEmailPessoa("");
-    setSalaSelecionada("");
+      setMensagem("Biometria removida com sucesso!");
+      setEmailPessoa("");
+      setSalaSelecionada("");
+    } catch (err) {
+      console.error(err);
+      setMensagem(err.response?.data?.detail || "Erro ao remover biometria.");
+    }
   };
 
   return (
     <div className="bg-black text-white w-[500px] rounded-2xl p-8 flex flex-col items-center gap-10">
-      {/* Títulos */}
       <div className="flex flex-col items-center gap-6">
         <h1 className="text-4xl font-bold text-[#F58232]">Sistema PIGRA</h1>
         <h2 className="text-base font-semibold text-white text-center">
@@ -58,9 +64,7 @@ function InputRemoveBiometrics() {
         </h2>
       </div>
 
-      {/* Formulário */}
       <div className="flex flex-col w-full gap-4">
-        {/* Input E-mail */}
         <div className="flex flex-col w-full">
           <label className="mb-1 text-sm text-gray-300">E-mail da Pessoa</label>
           <input
@@ -72,7 +76,6 @@ function InputRemoveBiometrics() {
           />
         </div>
 
-        {/* Select Sala */}
         <div className="flex flex-col w-full">
           <label className="mb-1 text-sm text-gray-300">Sala</label>
           <select
@@ -82,14 +85,13 @@ function InputRemoveBiometrics() {
           >
             <option value="">Selecione a sala</option>
             {salas.map((s) => (
-              <option key={s.id} value={s.nome}>
-                {s.nome} - {s.localizacao}
+              <option key={s.id} value={s.id}>
+                {s.name} - {s.location}
               </option>
             ))}
           </select>
         </div>
 
-        {/* Mensagem de feedback */}
         {mensagem && <span className="text-yellow-500">{mensagem}</span>}
 
         <button
