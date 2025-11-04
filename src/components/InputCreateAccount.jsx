@@ -11,11 +11,29 @@ function InputCreateAccount() {
   const [contaCriada, setContaCriada] = useState(false);
 
   const handleCadastro = async () => {
+    // Limpa mensagens antigas
+    setErro("");
+
+    // Validação: campos obrigatórios
     if (!nome || !email || !senha) {
       setErro("Preencha todos os campos!");
       return;
     }
 
+    // Validação: formato de e-mail
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setErro("Por favor, insira um e-mail válido (ex: exemplo@dominio.com).");
+      return;
+    }
+
+    // Validação: tamanho da senha
+    if (senha.length < 6) {
+      setErro("A senha deve ter pelo menos 6 caracteres.");
+      return;
+    }
+
+    // Se passou nas verificações, tenta criar conta
     try {
       await api.post("/user/", {
         name: nome,
@@ -27,7 +45,7 @@ function InputCreateAccount() {
       setErro("");
     } catch (err) {
       console.error(err);
-      setErro("Erro ao criar conta. Talvez o email já exista.");
+      setErro("E-mail inserido já está cadastrado.");
     }
   };
 
@@ -76,11 +94,11 @@ function InputCreateAccount() {
               />
             </div>
 
-            {erro && <span className="text-red-500">{erro}</span>}
+            {erro && <span className="text-red-500 text-xs mt-1">{erro}</span>}
 
             <button
               onClick={handleCadastro}
-              className="bg-[#F58232] p-3 mt-2 w-full rounded-md"
+              className="bg-[#F58232] p-3 mt-2 w-full rounded-md hover:bg-[#f8924f] transition"
             >
               Cadastrar
             </button>

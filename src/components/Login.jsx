@@ -69,7 +69,7 @@ function Login() {
           />
         </div>
 
-        {erro && <span className="text-red-500">{erro}</span>}
+        {erro && <span className="text-red-500 text-xs mt-1">{erro}</span>}
 
         <button
           onClick={handleLogin}
@@ -89,4 +89,4 @@ function Login() {
   );
 }
 
-export default Login; //22222
+export default Login;

@@ -35,6 +35,21 @@ function Account() {
     fetchUsuario();
   }, [usuarioId, navigate]);
 
+  // 🔹 Detecta o clique no botão "Voltar" do navegador
+  useEffect(() => {
+    const handleBackButton = () => {
+      localStorage.removeItem("usuarioLogadoId");
+      setUsuario(null);
+      navigate("/", { replace: true });
+    };
+
+    window.addEventListener("popstate", handleBackButton);
+
+    return () => {
+      window.removeEventListener("popstate", handleBackButton);
+    };
+  }, [navigate]);
+
   if (!usuario) return null;
 
   return (

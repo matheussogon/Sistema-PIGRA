@@ -74,7 +74,7 @@ function HistoryAccess() {
       <div className="grid grid-cols-3 text-gray-400 font-semibold border-b border-gray-600 pb-1 text-sm">
         <span>Nome</span>
         <span>Data/Hora</span>
-        <span>Autorização</span>
+        <span>Sala</span>
       </div>
 
       {/* Dados */}

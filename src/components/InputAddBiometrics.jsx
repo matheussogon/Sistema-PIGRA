@@ -142,7 +142,7 @@ function InputAddBiometrics() {
             </select>
           </div>
 
-          {erro && <span className="text-red-500">{erro}</span>}
+          {erro && <span className="text-red-500 text-xs mt-1">{erro}</span>}
 
           <button
             onClick={handleAdicionar}
